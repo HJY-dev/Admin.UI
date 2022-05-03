@@ -1,9 +1,14 @@
 <template>
-  <section style="padding:10px;">
+  <section style="padding: 10px">
     <!--查询-->
     <el-form :inline="true" :model="filters" @submit.native.prevent>
       <el-form-item>
-        <el-input v-model="filters.label" placeholder="视图名或地址" clearable @keyup.enter.native="onGetList">
+        <el-input
+          v-model="filters.label"
+          placeholder="视图名或地址"
+          clearable
+          @keyup.enter.native="onGetList"
+        >
           <template #prefix>
             <i class="el-input__icon el-icon-search" />
           </template>
@@ -20,7 +25,7 @@
           :icon="'el-icon-refresh'"
           :placement="'bottom-end'"
           :loading="syncLoading"
-          style="margin:0px;"
+          style="margin: 0px"
           @click="onSync"
         >
           <template #content>
@@ -35,7 +40,7 @@
           :type="'delete'"
           :placement="'bottom-end'"
           :loading="deleteLoading"
-          style="margin-left: 0px;"
+          style="margin-left: 0px"
           @click="onBatchDelete"
         >
           <template #content>
@@ -56,7 +61,7 @@
       :expand-row-keys="expandRowKeys"
       :tree-props="{ children: 'children', hasChildren: 'hasChildren' }"
       highlight-current-row
-      style="width: 100%;"
+      style="width: 100%"
       @select-all="onSelectAll"
       @select="onSelect"
     >
@@ -66,16 +71,34 @@
       <el-table-column prop="path" label="视图地址" width />
       <el-table-column prop="description" label="视图描述" width />
       <el-table-column prop="enabled" label="状态" width="100">
-        <template #default="{row}">
+        <template #default="{ row }">
           <el-tag :type="row.enabled ? 'success' : 'info'" disable-transitions>
-            {{ row.enabled ? '正常' : '禁用' }}
+            {{ row.enabled ? "正常" : "禁用" }}
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column v-if="checkPermission(['api:admin:view:update','api:admin:view:softdelete'])" label="操作" width="180">
+      <el-table-column
+        v-if="
+          checkPermission([
+            'api:admin:view:update',
+            'api:admin:view:softdelete',
+          ])
+        "
+        label="操作"
+        width="180"
+      >
         <template #default="{ $index, row }">
-          <el-button v-if="checkPermission(['api:admin:view:update'])" @click="onEdit($index, row)">编辑</el-button>
-          <my-confirm-button v-if="checkPermission(['api:admin:view:softdelete'])" type="delete" :loading="row._loading" @click="onDelete($index, row)" />
+          <el-button
+            v-if="checkPermission(['api:admin:view:update'])"
+            @click="onEdit($index, row)"
+            >编辑</el-button
+          >
+          <my-confirm-button
+            v-if="checkPermission(['api:admin:view:softdelete'])"
+            type="delete"
+            :loading="row._loading"
+            @click="onDelete($index, row)"
+          />
         </template>
       </el-table-column>
     </el-table>
@@ -87,7 +110,12 @@
       :visible.sync="addFormVisible"
       @close="onCloseAddForm"
     >
-      <el-form ref="addForm" :model="addForm" label-width="80px" :rules="addFormRules">
+      <el-form
+        ref="addForm"
+        :model="addForm"
+        label-width="80px"
+        :rules="addFormRules"
+      >
         <el-form-item prop="parentIds" label="上级视图">
           <el-cascader
             :key="addFormKey"
@@ -96,7 +124,7 @@
             :options="modules"
             :props="{ checkStrictly: true, value: 'id' }"
             filterable
-            style="width:100%;"
+            style="width: 100%"
           />
         </el-form-item>
         <el-form-item label="视图名称" prop="label">
@@ -112,12 +140,22 @@
           <el-switch v-model="addForm.enabled" />
         </el-form-item>
         <el-form-item label="说明" prop="description">
-          <el-input v-model="addForm.description" type="textarea" rows="2" auto-complete="off" />
+          <el-input
+            v-model="addForm.description"
+            type="textarea"
+            rows="2"
+            auto-complete="off"
+          />
         </el-form-item>
       </el-form>
       <template #footer>
         <el-button @click.native="addFormVisible = false">取消</el-button>
-        <my-confirm-button type="submit" :validate="addFormValidate" :loading="addLoading" @click="onAddSubmit" />
+        <my-confirm-button
+          type="submit"
+          :validate="addFormValidate"
+          :loading="addLoading"
+          @click="onAddSubmit"
+        />
       </template>
     </my-window>
 
@@ -128,7 +166,12 @@
       :visible.sync="editFormVisible"
       @close="onCloseEditForm"
     >
-      <el-form ref="editForm" :model="editForm" :rules="editFormRules" label-width="80px">
+      <el-form
+        ref="editForm"
+        :model="editForm"
+        :rules="editFormRules"
+        label-width="80px"
+      >
         <el-form-item prop="parentIds" label="上级视图">
           <el-cascader
             :key="editFormKey"
@@ -137,7 +180,7 @@
             :options="modules"
             :props="{ checkStrictly: true, value: 'id' }"
             filterable
-            style="width:100%;"
+            style="width: 100%"
           />
         </el-form-item>
         <el-form-item label="视图名称" prop="label">
@@ -153,19 +196,29 @@
           <el-switch v-model="editForm.enabled" />
         </el-form-item>
         <el-form-item label="说明" prop="description">
-          <el-input v-model="editForm.description" type="textarea" rows="2" auto-complete="off" />
+          <el-input
+            v-model="editForm.description"
+            type="textarea"
+            rows="2"
+            auto-complete="off"
+          />
         </el-form-item>
       </el-form>
       <template #footer>
         <el-button @click.native="editFormVisible = false">取消</el-button>
-        <my-confirm-button type="submit" :validate="editFormValidate" :loading="editLoading" @click="onEditSubmit" />
+        <my-confirm-button
+          type="submit"
+          :validate="editFormValidate"
+          :loading="editLoading"
+          @click="onEditSubmit"
+        />
       </template>
     </my-window>
   </section>
 </template>
 
 <script>
-import { formatTime, treeToList, listToTree, getTreeParents } from '@/utils'
+import { formatTime, treeToList, listToTree, getTreeParents } from "@/utils";
 import {
   removeView,
   editView,
@@ -173,21 +226,21 @@ import {
   syncView,
   getViewList,
   batchRemoveView,
-  getView
-} from '@/api/admin/view'
-import MyWindow from '@/components/my-window'
-import MyConfirmButton from '@/components/my-confirm-button'
+  getView,
+} from "@/api/admin/view";
+import MyWindow from "@/components/my-window";
+import MyConfirmButton from "@/components/my-confirm-button";
 
 export default {
-  name: 'AdminView',
+  name: "AdminView",
   components: {
     MyWindow,
-    MyConfirmButton
+    MyConfirmButton,
   },
   data() {
     return {
       filters: {
-        label: ''
+        label: "",
       },
       viewTree: [],
       expandRowKeys: [],
@@ -198,275 +251,322 @@ export default {
       editFormVisible: false, // 编辑界面是否显示
       editLoading: false,
       editFormRules: {
-        parentIds: [{ required: true, message: '请选择上级视图', trigger: 'change' }],
-        label: [{ required: true, message: '请输入视图名', trigger: 'blur' }]
+        parentIds: [
+          { required: true, message: "请选择上级视图", trigger: "change" },
+        ],
+        label: [{ required: true, message: "请输入视图名", trigger: "blur" }],
       },
       // 编辑界面数据
       editForm: {
         id: 0,
         parentIds: [],
-        label: '',
-        name: '',
-        path: '',
+        label: "",
+        name: "",
+        path: "",
         enabled: false,
-        description: ''
+        description: "",
       },
       editFormKey: 1,
 
       addFormVisible: false, // 新增界面是否显示
       addLoading: false,
       addFormRules: {
-        parentIds: [{ required: true, message: '请选择上级视图', trigger: 'change' }],
-        label: [{ required: true, message: '请输入视图名', trigger: 'blur' }]
+        parentIds: [
+          { required: true, message: "请选择上级视图", trigger: "change" },
+        ],
+        label: [{ required: true, message: "请输入视图名", trigger: "blur" }],
       },
       // 新增界面数据
       addForm: {
         parentIds: [],
-        label: '',
-        name: '',
-        path: '',
+        label: "",
+        name: "",
+        path: "",
         enabled: true,
-        description: ''
+        description: "",
       },
       addFormKey: 1,
       modules: [],
       syncLoading: false,
-      deleteLoading: false
-    }
+      deleteLoading: false,
+    };
   },
   mounted() {
-    this.onGetList()
+    this.onGetList();
   },
   methods: {
-    formatCreatedTime: function(row, column, time) {
-      return formatTime(time, 'YYYY-MM-DD HH:mm')
+    formatCreatedTime: function (row, column, time) {
+      return formatTime(time, "YYYY-MM-DD HH:mm");
     },
     // 获取列表
     async onGetList() {
       const para = {
-        key: this.filters.label
-      }
-      this.listLoading = true
-      const res = await getViewList(para)
-      this.listLoading = false
+        key: this.filters.label,
+      };
+      this.listLoading = true;
+      const res = await getViewList(para);
+      this.listLoading = false;
 
       if (!res?.success) {
-        return
+        return;
       }
 
-      const list = _.cloneDeep(res.data)
+      const list = _.cloneDeep(res.data);
 
-      const keys = list.filter(l => l.parentId === 0).map(l => l.id + '')
-      this.expandRowKeys = keys
+      const keys = list.filter((l) => l.parentId === 0).map((l) => l.id + "");
+      this.expandRowKeys = keys;
 
       this.modules = listToTree(_.cloneDeep(list), {
         id: 0,
         parentId: 0,
-        label: '顶级'
-      })
+        label: "顶级",
+      });
 
-      list.forEach(l => {
-        l._loading = false
-      })
+      list.forEach((l) => {
+        l._loading = false;
+      });
 
-      const tree = listToTree(list)
-      this.sels = []
-      this.viewTree = tree
+      const tree = listToTree(list);
+      this.sels = [];
+      this.viewTree = tree;
     },
     // 显示编辑界面
     async onEdit(index, row) {
-      const loading = this.$loading()
-      const res = await getView({ id: row.id })
-      loading.close()
+      const loading = this.$loading();
+      const res = await getView({ id: row.id });
+      loading.close();
       if (res && res.success) {
-        const parents = getTreeParents(this.viewTree, row.id)
-        const parentIds = parents.map(p => p.id)
-        parentIds.unshift(0)
+        const parents = getTreeParents(this.viewTree, row.id);
+        const parentIds = parents.map((p) => p.id);
+        parentIds.unshift(0);
 
-        const data = res.data
-        data.parentIds = parentIds
-        this.editForm = data
-        this.editFormVisible = true
-        ++this.editFormKey
+        const data = res.data;
+        data.parentIds = parentIds;
+        this.editForm = data;
+        this.editFormVisible = true;
+        ++this.editFormKey;
       }
     },
     onCloseEditForm() {
-      this.$refs.editForm.resetFields()
-      ++this.editFormKey
+      this.$refs.editForm.resetFields();
+      ++this.editFormKey;
     },
     // 显示新增界面
     onAdd() {
-      this.addFormVisible = true
+      this.addFormVisible = true;
     },
     onCloseAddForm() {
-      this.$refs.addForm.resetFields()
-      ++this.addFormKey
+      this.$refs.addForm.resetFields();
+      ++this.addFormKey;
     },
     // 编辑
-    editFormValidate: function() {
-      let isValid = false
-      this.$refs.editForm.validate(valid => {
-        isValid = valid
-      })
-      return isValid
+    editFormValidate: function () {
+      let isValid = false;
+      this.$refs.editForm.validate((valid) => {
+        isValid = valid;
+      });
+      return isValid;
     },
     async onEditSubmit() {
-      this.editLoading = true
-      const para = _.cloneDeep(this.editForm)
-      para.parentId = para.parentIds.pop()
+      this.editLoading = true;
+      const para = _.cloneDeep(this.editForm);
+      para.parentId = para.parentIds.pop();
       if (para.id === para.parentId) {
         this.$message({
-          message: '上级视图不能是自己！',
-          type: 'error'
-        })
-        this.editLoading = false
-        return
+          message: "上级视图不能是自己！",
+          type: "error",
+        });
+        this.editLoading = false;
+        return;
       }
 
-      const res = await editView(para)
-      this.editLoading = false
+      const res = await editView(para);
+      this.editLoading = false;
 
       if (!res?.success) {
-        return
+        return;
       }
 
       this.$message({
-        message: this.$t('admin.updateOk'),
-        type: 'success'
-      })
-      this.$refs['editForm'].resetFields()
-      this.editFormVisible = false
-      this.onGetList()
+        message: this.$t("admin.updateOk"),
+        type: "success",
+      });
+      this.$refs["editForm"].resetFields();
+      this.editFormVisible = false;
+      this.onGetList();
     },
     // 新增
-    addFormValidate: function() {
-      let isValid = false
-      this.$refs.addForm.validate(valid => {
-        isValid = valid
-      })
-      return isValid
+    addFormValidate: function () {
+      let isValid = false;
+      this.$refs.addForm.validate((valid) => {
+        isValid = valid;
+      });
+      return isValid;
     },
     async onAddSubmit() {
-      this.addLoading = true
-      const para = _.cloneDeep(this.addForm)
-      para.parentId = para.parentIds.pop()
+      this.addLoading = true;
+      const para = _.cloneDeep(this.addForm);
+      para.parentId = para.parentIds.pop();
 
-      const res = await addView(para)
-      this.addLoading = false
+      const res = await addView(para);
+      this.addLoading = false;
 
       if (!res?.success) {
-        return
+        return;
       }
       this.$message({
-        message: this.$t('admin.addOk'),
-        type: 'success'
-      })
-      this.$refs['addForm'].resetFields()
-      this.addFormVisible = false
-      this.onGetList()
+        message: this.$t("admin.addOk"),
+        type: "success",
+      });
+      this.$refs["addForm"].resetFields();
+      this.addFormVisible = false;
+      this.onGetList();
     },
     // 删除
     async onDelete(index, row) {
-      row._loading = true
-      const para = { id: row.id }
-      const res = await removeView(para)
+      row._loading = true;
+      const para = { id: row.id };
+      const res = await removeView(para);
 
-      row._loading = false
+      row._loading = false;
 
       if (!res?.success) {
-        return
+        return;
       }
       this.$message({
-        message: this.$t('admin.deleteOk'),
-        type: 'success'
-      })
-      this.onGetList()
+        message: this.$t("admin.deleteOk"),
+        type: "success",
+      });
+      this.onGetList();
     },
     // 批量删除
     async onBatchDelete() {
-      const para = { ids: [] }
-      para.ids = this.sels.map(s => {
-        return s.id
-      })
+      const para = { ids: [] };
+      para.ids = this.sels.map((s) => {
+        return s.id;
+      });
 
-      this.deleteLoading = true
-      const res = await batchRemoveView(para.ids)
-      this.deleteLoading = false
+      this.deleteLoading = true;
+      const res = await batchRemoveView(para.ids);
+      this.deleteLoading = false;
 
       if (!res?.success) {
-        return
+        return;
       }
 
       this.$message({
-        message: this.$t('admin.batchDeleteOk'),
-        type: 'success'
-      })
+        message: this.$t("admin.batchDeleteOk"),
+        type: "success",
+      });
 
-      this.onGetList()
+      this.onGetList();
     },
     // 同步view
     async onSync() {
-      const viewFiles = require.context('@/views', true, /\.vue$/)
+      const viewFiles = require.context("@/views", true, /\.vue$/);
       const views = viewFiles.keys().reduce((views, modulePath) => {
-        const path = modulePath.replace(/^\.\/(.*)\.\w+$/, '$1')
-        const view = viewFiles(modulePath)
-        const name = view.default.name
-        const syncInfo = view.default._sync
-        if (name === 'DictionaryType') {
-          console.log(view)
+        const path = modulePath.replace(/^\.\/(.*)\.\w+$/, "$1");
+        const view = viewFiles(modulePath);
+        const name = view.default.name;
+        const syncInfo = view.default._sync;
+        // console.log(
+        //   "输出" + path + "||" + view + "||" + name + "||" + syncInfo
+        // );
+
+        if (name === "DictionaryType") {
+          console.log(view);
         }
-        const excludeNames = ['Login', 'LoginCallback', 'RefreshToken', 'Error404']
+        const excludeNames = [
+          "Login",
+          "LoginCallback",
+          "RefreshToken",
+          "Error404",
+        ];
         if (!excludeNames.includes(name) && syncInfo?.disabled !== true) {
           views[views.length] = {
             path: path,
             name: name,
             label: syncInfo?.title,
             description: syncInfo?.desc,
-            cache: syncInfo?.cache !== false
-          }
+            cache: syncInfo?.cache !== false,
+            parentId: syncInfo?.parentId,
+          };
         }
-        return views
-      }, [])
+        return views;
+      }, []);
 
-      this.syncLoading = true
-      const syncRes = await syncView({ views })
-      this.syncLoading = false
-
-      if (!syncRes?.success) {
-        return
+      const excludePaths = [
+        "account/settings",
+        "admin/api",
+        "admin/cache",
+        "admin/document",
+        "admin/home",
+        "admin/login-log",
+        "admin/opration-log",
+        "admin/permission",
+        "admin/role-permission",
+        "admin/role",
+        "admin/tenant",
+        "admin/user",
+        "admin/view",
+      ];
+      var errortext = "";
+      for (let index = 0; index < views.length; index++) {
+        const element = views[index];
+        if (
+          (!element?.label || !element?.name) &&
+          !excludePaths.includes(element.path)
+        )
+          errortext += element.path + "\r\n";
       }
 
-      this.$message({
-        message: this.$t('view.sync'),
-        type: 'success'
-      })
-      this.onGetList()
+      if (errortext != "") {
+        //console.log(errortext)
+        this.$message({
+          message: "请检查" + errortext + "视图配置，_sync配置缺失",
+          type: "error",
+        });
+      } else {
+        this.syncLoading = true;
+        const syncRes = await syncView({ views });
+        this.syncLoading = false;
+
+        if (!syncRes?.success) {
+          return;
+        }
+
+        this.$message({
+          message: this.$t("view.sync"),
+          type: "success",
+        });
+        this.onGetList();
+      }
     },
     // 生成前端view
     onGenerate() {
       // let bb = this.sels
     },
-    onSelectAll: function(selection) {
-      const selections = treeToList(selection)
-      const rows = treeToList(this.viewTree)
-      const checked = selections.length === rows.length
-      rows.forEach(row => {
-        this.$refs.multipleTable.toggleRowSelection(row, checked)
-      })
+    onSelectAll: function (selection) {
+      const selections = treeToList(selection);
+      const rows = treeToList(this.viewTree);
+      const checked = selections.length === rows.length;
+      rows.forEach((row) => {
+        this.$refs.multipleTable.toggleRowSelection(row, checked);
+      });
 
-      this.sels = this.$refs.multipleTable.selection
+      this.sels = this.$refs.multipleTable.selection;
     },
-    onSelect: function(selection, row) {
-      const checked = selection.some(s => s.id === row.id)
+    onSelect: function (selection, row) {
+      const checked = selection.some((s) => s.id === row.id);
       if (row.children && row.children.length > 0) {
-        const rows = treeToList(row.children)
-        rows.forEach(row => {
-          this.$refs.multipleTable.toggleRowSelection(row, checked)
-        })
+        const rows = treeToList(row.children);
+        rows.forEach((row) => {
+          this.$refs.multipleTable.toggleRowSelection(row, checked);
+        });
       }
 
-      this.sels = this.$refs.multipleTable.selection
-    }
-  }
-}
+      this.sels = this.$refs.multipleTable.selection;
+    },
+  },
+};
 </script>
